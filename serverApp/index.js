@@ -1,4 +1,5 @@
-const AWS = require('./node_modules/aws-sdk');
+const AWS = require('aws-sdk');
+const express = require ('express');
 
 AWS.config.update({
     region: "us-east-1",
@@ -6,7 +7,17 @@ AWS.config.update({
 });
 
 const dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+const app = express();
 
-const params = require('./params/insertItem.js')
+const params = require('./params/insertItem.js');
+const port = process.env.PORT || 3000;
 
-console.log(params)
+app.get('/', (req, res) => {
+    res.json({
+        "message": "i am god lol"
+    })
+})
+
+app.listen(port, () => {
+    console.log(`Listening to port ${port}`);
+});
