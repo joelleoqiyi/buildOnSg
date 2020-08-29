@@ -6,84 +6,34 @@ AWS.config.update({
 });
 
 const dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-const dynamoDB2 = new AWS.DynamoDB.DocumentClient()
 const sesv2 = new AWS.SESV2({apiVersion: '2019-09-27'});
+const ses = new AWS.SES({apiVersion: '2010-12-01'});
 const bodyParser = require('body-parser');
+const qrcode = require('qrcode');
 const { v4 : uuid } = require('uuid');
+const { response } = require('express');
 const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.get('/', (req, res) => {
-    res.json({
-        "message": uuid()
+function declarationCheck (req, res, next) {
+    const check = {
+        "de1" : req.body.de1, 
+        "de2" : req.body.de2, 
+        "de3" : req.body.de3,
+    };
+    Object.entries(check).forEach((i) => {
+        req.body[i[0]] = (i[1] === "true") ? true : false
     })
-})
-
-app.post('/login', (req, res) => {
-    const username = req.body.username ?? null;
-    const password = req.body.password ?? null;
-    if (!username || !password) {
-        res.json({
-            "error": "invalid input"
-        })
-        res.end(); 
-        return;
-    } 
-    const params = {
-        "TableName": "loginDetails",
-        "Key": {
-            "userID": {
-                "S": username
-            }
-        },
-        "ProjectionExpression": "userPassword",
-        "ConsistentRead": true,
-        "ReturnConsumedCapacity": "NONE"
+    if (!(Object.values(req.body).includes(false))){
+        next()
     }
+    else res.send("declaration invalid")
+}
 
-    dynamodb.getItem(params, (err, { Item : data }) => {
-        if (err) console.log(err.stack)
-        else {
-            const resPassword = data.userPassword.S ?? null
-            if (resPassword && resPassword === password) {
-                res.json({
-                    "success": "loggedIn"
-                })
-            } else {
-                res.json({
-                    "failure": "password wrong/ username doesnt exist"
-                })
-            }
-        }
-    })
-});
-
-app.get('/retrieveSpecific', (req, res) => {
-    const params = {
-        "TableName": "visitorDetails",
-        "Key": {
-            "visitingID": {
-                "S": "7bb25b5f-6363-4fa5-a0dc-156f9e54253f"
-            },
-            "visitingDate": {
-                "S": "2020-08-29"
-            }
-        },
-        "ProjectionExpression":"visitor",
-        "ConsistentRead": true,
-        "ReturnConsumedCapacity": "TOTAL"
-    }
-
-    dynamodb.getItem(params, (err, data) => {
-        if (err) console.log(err.stack)
-        else console.log(data.Item.visitor.M.firstName)
-    })
-})
-
-app.post('/reservation', (req, res) => {
+function getDetails (dc, req, res, next) {
     const details = {
         "visitingDate": req.body.date ?? null,
         "firstName": req.body.firstName ?? null,
@@ -96,92 +46,401 @@ app.post('/reservation', (req, res) => {
         "patientLastName": req.body.patientLastName ?? null,
         "patientWard": req.body.ward ?? null, 
         "patientBed": req.body.bed ?? null,
-        "uuid": uuid()
+        "visitingID": (dc) ? req.body.id : uuid(),
+        "declaration1": (dc) ? req.body.de1 : null,
+        "declaration2": (dc) ? req.body.de2 : null,
+        "declaration3": (dc) ? req.body.de3 : null
     }
+
+    if (!Object.values(details).includes(null) && !Object.values(details).includes("")) {
+        req.details = details;
+        next();
+    } else {
+        res.send("input invalid")
+    }
+}
+
+app.get('/', (req, res) => {
+    x = "l"
+    y = "x"
+    const replacementTemplateData = `{\"firstName\":\"${x}\",\"formLink\":\"${y}\"}`
+    console.log(typeof replacementTemplateData, )
+    res.send(replacementTemplateData)
+})
+
+app.post('/login/:user', (req, res) => {
+    const username = req.body.username ?? null;
+    const password = req.body.password ?? null;
+    const fullName = req.body.name ?? null;
+    const userTypes = ["staff", "patient"];
+    const user = userTypes.includes(req.params.user) ? req.params.user : null;
+
+    const params = (user == "staff")
+        ?   {
+            "TableName": "adminDetails",
+            "ConsistentRead": true,
+            "ExpressionAttributeNames": {
+                "#uid": "userID",
+                "#p": "userPassword",
+                "#r": "roomStats"
+            },
+            "ExpressionAttributeValues": {
+                ":u": {
+                    "S": username
+                },
+                ":p": {
+                    "S": password
+                }
+            },
+            "FilterExpression": "#uid = :u AND #p = :p",
+            "ProjectionExpression": "#r",
+        } : {
+            "TableName": "patientDetails",
+            "ConsistentRead": true,
+            "ExpressionAttributeNames": {
+                "#uid": "userID",
+                "#fn": "firstName",
+                "#ln": "lastName",
+                "#b": "bed",
+                "#w": "ward"
+            },
+            "ExpressionAttributeValues": {
+                ":u": {
+                    "S": username
+                },
+                ":fn": {
+                    "S": fullName.substr(0, fullName.indexOf(" "))
+                },
+                ":ln": {
+                    "S": fullName.substr(fullName.indexOf(" ")+1)
+                }
+            },
+            "FilterExpression": "#uid = :u AND #fn = :fn AND #ln = :ln",
+            "ProjectionExpression": "#b, #w",
+        };
+    console.log(params)
+    dynamodb.scan(params).promise()
+        .then(({ Items: data }) => {
+            console.log(data)
+            const result = data.map((i) => {
+                if (user === "staff"){
+                    const roomStats = i.roomStats.M;
+                    Object.keys(roomStats).forEach((room) => {
+                        roomStats[room] = roomStats[room].N
+                    })
+                    return roomStats
+                } else {
+                    Object.keys(i).forEach((d) => {
+                        i[d] = i[d].S
+                    })
+                    return i
+                }
+            })
+            res.send(result)
+        })
+        .catch((err) => {
+            res.send(err)
+        })
+});
+
+app.post('/healthdeclaration', declarationCheck, (req, res, next) => {
     //lets assume that there is all greatness in people and no false value is given. not implementing any checks
-    if (!Object.values(details).includes(null) || !Object.values(details).includes("")) {
-        const params = {
-            "TableName": "visitorDetails",
-            "Item": {
-                "visitingID": {
-                    "S": details.uuid //lets also assume that uuid does its job properly. 
-                },
-                "visitingDate": {
-                    "S": details.visitingDate
-                },
-                "visitor": {
-                    "M": {
-                        "firstName": {
-                            "S": details.firstName
-                        },
-                        "lastName": {
-                            "S": details.lastName
-                        },
-                        "NRIC": {
-                            "S": details.NRIC
-                        },
-                        "emailAddress": {
-                            "S": details.emailAddress
-                        },
-                        "relationship": {
-                            "S": details.relationship
-                        },
-                        "address": {
-                            "S": details.address
-                        },
-                        "checkInDetails": {
-                            "M": {
-                                "checkedIn": {
-                                    "BOOL": false
-                                },
-                                "checkedOut": {
-                                    "BOOL": false
-                                },
-                                "checkedInTiming": {
-                                    "S": "null"
-                                },
-                                "checkedOutTiming": {
-                                    "S": "null"
-                                }
+    getDetails(true, req, res, next);
+}, (req, res) => {
+    const details = req.details;
+    const params = {
+        "TableName": "visitorDetails",
+        "Key": {
+            "visitingID": {
+                "S": details.visitingID
+            },
+            "visitingDate": {
+                "S": details.visitingDate
+            }
+        },
+        "ExpressionAttributeNames": {
+            "#cID": "checkInID",
+            "#de1": "declaration1",
+            "#de2": "declaration2",
+            "#de3": "declaration3",
+            "#V": "visitor",
+            "#hd": "healthDeclaration",
+            "#cid": "checkInDetails"
+        },
+        "ExpressionAttributeValues": {
+            ":a1": {
+                "BOOL": details.declaration1
+            },
+            ":a2": {
+                "BOOL": details.declaration2
+            },
+            ":a3": {
+                "BOOL": details.declaration3
+            },
+            ":c": {
+                "S": uuid()
+            }
+        },
+        "UpdateExpression":"SET #V.#hd.#de1 = :a1, #V.#hd.#de2 = :a2, #V.#hd.#de3 = :a3, #V.#cid.#cID = :c",
+        "ReturnValues": "UPDATED_NEW"
+    }
+
+    dynamodb.updateItem(params, (err, data) => {
+        if (err) {
+            res.send("something went wrong oh no")
+        } else {
+            const checkInID = data.Attributes.visitor.M.checkInDetails.M.checkInID.S;
+            qrcode.toDataURL(checkInID, (err, url) => {
+                const img = Buffer.from(url.replace(/^data:image\/png;base64,/, ''), 'base64');
+                res.writeHead(200, {
+                    'Content-Type': 'image/png',
+                    'Content-Length': img.length
+                  });
+                res.end(img);
+            })
+        }
+    }) 
+});
+
+app.post('/reservation', (req, res, next) => {
+    getDetails(false, req, res, next);
+    //lets assume that there is all greatness in people and no false value is given. not implementing any checks
+}, (req, res) => {
+    const details = req.details;
+    const params = {
+        "TableName": "visitorDetails",
+        "Item": {
+            "visitingID": {
+                "S": details.visitingID //lets also assume that uuid does its job properly. 
+            },
+            "visitingDate": {
+                "S": details.visitingDate
+            },
+            "visitor": {
+                "M": {
+                    "firstName": {
+                        "S": details.firstName
+                    },
+                    "lastName": {
+                        "S": details.lastName
+                    },
+                    "NRIC": {
+                        "S": details.NRIC
+                    },
+                    "emailAddress": {
+                        "S": details.emailAddress
+                    },
+                    "relationship": {
+                        "S": details.relationship
+                    },
+                    "address": {
+                        "S": details.address
+                    },
+                    "checkInDetails": {
+                        "M": {
+                            "checkedIn": {
+                                "BOOL": false
+                            },
+                            "checkedOut": {
+                                "BOOL": false
+                            },
+                            "checkedInTiming": {
+                                "S": "null"
+                            },
+                            "checkedOutTiming": {
+                                "S": "null"
+                            },
+                            "checkInID": {
+                                "S": "null"
+                            }
+                        }
+                    },
+                    "healthDeclaration": {
+                        "M": {
+                            "declaration1": {
+                                "BOOL": false
+                            },
+                            "declaration2": {
+                                "BOOL": false
+                            },
+                            "declaration3": {
+                                "BOOL": false
                             }
                         }
                     }
-                },
-                "patientDetails": {
-                    "M": {
-                        "firstName": {
-                            "S": details.patientFirstName
-                        },
-                        "lastName": {
-                            "S": details.patientLastName
-                        },
-                        "ward": {
-                            "S": details.patientWard
-                        },
-                        "bed": {
-                            "S": details.patientBed
-                        },
-                    }
+                }
+            },
+            "patientDetails": {
+                "M": {
+                    "firstName": {
+                        "S": details.patientFirstName
+                    },
+                    "lastName": {
+                        "S": details.patientLastName
+                    },
+                    "ward": {
+                        "S": details.patientWard
+                    },
+                    "bed": {
+                        "S": details.patientBed
+                    },
                 }
             }
         }
-
-        dynamodb.putItem(params, (err, data) => {
-            if (data === {}){
-                res.json({
-                    "success": "reservation.",
-                    "payload": details.uuid
-                })
-            }
-        })
-    } else {
-        res.json({
-            "error": "invalid input"
-        })
     }
 
+    dynamodb.putItem(params, (err, data) => {
+        if (data){
+            res.json({
+                "success": "reservation.",
+                "payload": details.visitingID
+            })
+        } else {
+            res.send(err)
+        }
+    })
 })
 
+app.get('/retrieveDate', async (req, res) => {
+    const d = new Date(new Date().getTime() - 28800000); //(+8hrs or + 28800000 depending on server location)
+    const queryParams = {
+        "TableName": "visitorDetails",
+        "ConsistentRead": true,
+        "ExpressionAttributeNames": {
+            "#V": "visitor",
+            "#vd": "visitingDate",
+            "#vs": "emailSent",
+            "#PD": "patientDetails"
+        },
+        "ExpressionAttributeValues": {
+            ":e": {
+                "S": `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`
+            },
+            ":s": {
+                "BOOL": false
+            }
+        },
+        "FilterExpression": "#vd = :e AND #V.#vs = :s",
+        "ProjectionExpression": "#V, #vd, #PD",
+    };
+
+    const detailsList = await dynamodb.scan(queryParams).promise()
+        .then((data) => {
+            return data.Items.map((item) => {
+                if (!item.visitor.M.emailAddress.S || !item.visitor.M || !item.patientDetails.M) {
+                    return null
+                } else {
+                    const visitor = item.visitor.M ?? null;
+                    const patient = item.patientDetails.M ?? null;
+                    
+                    const formLink = `https://google.com?fn=${visitor.firstName.S}&ln=${visitor.lastName.S}&nric=${visitor.NRIC.S}&rs=${visitor.relationship.S}&pfn=${patient.firstName.S}&pln=${patient.lastName.S}&pw=${patient.ward.S}&pb=${patient.bed.S}`;
+                    const replacementTemplateData = `{\"firstName\":\"${visitor.firstName.S}\",\"formLink\":\"${formLink}\"}`;
+
+                    const emailTemplateEntries = {
+                        "Destination": {
+                            "ToAddresses": [String(visitor.emailAddress.S)]
+                        },
+                        "ReplacementEmailContent": {
+                            "ReplacementTemplate": {
+                                "ReplacementTemplateData": String(replacementTemplateData)
+                            }
+                        }
+                    };
+
+                    return emailTemplateEntries;
+                }
+            }).filter((f) => {
+                return (f !== undefined && f !== null) //removes null values
+            })
+        })
+
+    const emailParams = {
+        "BulkEmailEntries": detailsList,
+        "DefaultContent": {
+            "Template": {
+                "TemplateName": "healthDeclarationEmailTemplate",
+                "TemplateData": `{\"firstName\":\"Oh no!\",\"formLink\":\"Something went wrong!\"}`
+            }
+        },
+        "FromEmailAddress": "leo.qiyi.joel@dhs.sg",
+        "ReplyToAddresses": ["leo.qiyi.joel@dhs.sg"]
+    }
+
+    sesv2.sendBulkEmail(emailParams).promise()
+        .then((data) => {
+            res.send(data)
+        })
+})
+
+app.get('/retrieveDateV1', async (req, res) => {
+    const d = new Date(new Date().getTime() - 28800000); //(+8hrs or + 28800000 depending on server location)
+    const queryParams = {
+        "TableName": "visitorDetails",
+        "ConsistentRead": true,
+        "ExpressionAttributeNames": {
+            "#V": "visitor",
+            "#VID": "visitingID",
+            "#vs": "emailSent",
+            "#PD": "patientDetails",
+            "#vd": "visitingDate"
+        },
+        "ExpressionAttributeValues": {
+            ":e": {
+                "S": `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`
+            },
+            ":s": {
+                "BOOL": false
+            }
+        },
+        "FilterExpression": "#vd = :e AND #V.#vs = :s",
+        "ProjectionExpression": "#V, #VID, #PD, #vd",
+    };
+
+    const detailsList = await dynamodb.scan(queryParams).promise()
+        .then((data) => {
+            return data.Items.map((item) => {
+                if (!item.visitor.M.emailAddress.S || !item.visitor.M || !item.patientDetails.M) {
+                    return null
+                } else {
+                    const visitor = item.visitor.M ?? null;
+                    const patient = item.patientDetails.M ?? null;
+                    const visitingID = item.visitingID.S ?? null;
+                    const visitingDate = item.visitingDate.S ?? null;
+                    
+                    const formLink = `https://google.com?id=${visitingID}&fn=${visitor.firstName.S}&ln=${visitor.lastName.S}&nric=${visitor.NRIC.S}&rs=${visitor.relationship.S}&d=${visitingDate}&pfn=${patient.firstName.S}&pln=${patient.lastName.S}&pw=${patient.ward.S}&pb=${patient.bed.S}`;
+                    const replacementTemplateData = `{\"firstName\":\"${visitor.firstName.S}\",\"formLink\":\"${formLink}\",\"visitingID\":\"${visitingID}\"}`;
+
+                    const emailTemplateEntries = {
+                        "Destination": {
+                            "ToAddresses": [String(visitor.emailAddress.S)]
+                        },
+                        "ReplacementTemplateData": String(replacementTemplateData)
+                    };
+
+                    return emailTemplateEntries;
+                }
+            }).filter((f) => {
+                return (f !== undefined && f !== null) //removes null values
+            })
+        })
+
+    const emailParams = {
+        "Destinations": detailsList,
+        "Template": "healthDeclarationEmailTemplate",
+        "DefaultTemplateData": `{\"firstName\":\"Oh no!\",\"formLink\":\"Something went wrong!\"}`,
+        "Source": "leo.qiyi.joel@dhs.sg",
+        "ReplyToAddresses": ["leo.qiyi.joel@dhs.sg"]
+    }
+    
+    if (emailParams.Destinations.length > 0){
+        ses.sendBulkTemplatedEmail(emailParams).promise()
+            .then((data) => {
+                res.send(data)
+            })
+    } else {
+        res.send("nth to send bruh")
+    }
+})
 
 app.listen(port, () => {
     console.log(`Listening to port ${port}`);
