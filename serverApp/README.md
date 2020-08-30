@@ -1,1 +1,1 @@
-## This folder is for testing of dynamoDB feature
+## This folder is for serverApp

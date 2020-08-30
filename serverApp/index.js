@@ -11,7 +11,6 @@ const ses = new AWS.SES({apiVersion: '2010-12-01'});
 const bodyParser = require('body-parser');
 const qrcode = require('qrcode');
 const { v4 : uuid } = require('uuid');
-const { response } = require('express');
 const port = process.env.PORT || 3000;
 
 const app = express();
@@ -28,6 +27,12 @@ function declarationCheck (req, res, next) {
         req.body[i[0]] = (i[1] === "true") ? true : false
     })
     if (!(Object.values(req.body).includes(false))){
+        const details = {
+            "declaration1": req.body.de1,
+            "declaration2": req.body.de2,
+            "declaration3": req.body.de3
+        }
+        req.details = details;
         next()
     }
     else res.send("declaration invalid")
@@ -35,25 +40,24 @@ function declarationCheck (req, res, next) {
 
 function getDetails (dc, req, res, next) {
     const details = {
-        "visitingDate": req.body.date ?? null,
-        "firstName": req.body.firstName ?? null,
-        "lastName": req.body.lastName ?? null,
-        "NRIC": req.body.nric ?? null,
-        "emailAddress": req.body.email ?? null,
-        "relationship": req.body.relationship ?? null,
-        "address": req.body.address ?? null,
-        "patientFirstName": req.body.patientFirstName ?? null,
-        "patientLastName": req.body.patientLastName ?? null,
-        "patientWard": req.body.ward ?? null, 
-        "patientBed": req.body.bed ?? null,
-        "visitingID": (dc) ? req.body.id : uuid(),
-        "declaration1": (dc) ? req.body.de1 : null,
-        "declaration2": (dc) ? req.body.de2 : null,
-        "declaration3": (dc) ? req.body.de3 : null
+        "visitingDate": req.body.date || null,
+        "firstName": req.body.firstName || null,
+        "lastName": req.body.lastName || null,
+        "NRIC": req.body.nric || null,
+        "emailAddress": req.body.email || null,
+        "relationship": req.body.relationship || null,
+        "address": req.body.address || null,
+        "patientFirstName": req.body.patientFirstName || null,
+        "patientLastName": req.body.patientLastName || null,
+        "patientWard": req.body.ward || null, 
+        "patientBed": req.body.bed || null,
+        "visitingID": (dc) ? (req.body.id || null) : uuid()
     }
 
+    console.log(details)
     if (!Object.values(details).includes(null) && !Object.values(details).includes("")) {
-        req.details = details;
+        if (req.details) Object.assign(req.details, details);
+        else req.details = details;
         next();
     } else {
         res.send("input invalid")
@@ -61,7 +65,8 @@ function getDetails (dc, req, res, next) {
 }
 
 app.get('/', (req, res) => {
-    x = "l"
+    const x = req.body.x || null
+    xx = "l"
     y = "x"
     const replacementTemplateData = `{\"firstName\":\"${x}\",\"formLink\":\"${y}\"}`
     console.log(typeof replacementTemplateData, )
@@ -69,9 +74,9 @@ app.get('/', (req, res) => {
 })
 
 app.post('/login/:user', (req, res) => {
-    const username = req.body.username ?? null;
-    const password = req.body.password ?? null;
-    const fullName = req.body.name ?? null;
+    const username = req.body.username || null;
+    const password = req.body.password || null;
+    const fullName = req.body.name || null;
     const userTypes = ["staff", "patient"];
     const user = userTypes.includes(req.params.user) ? req.params.user : null;
 
@@ -330,8 +335,8 @@ app.get('/retrieveDate', async (req, res) => {
                 if (!item.visitor.M.emailAddress.S || !item.visitor.M || !item.patientDetails.M) {
                     return null
                 } else {
-                    const visitor = item.visitor.M ?? null;
-                    const patient = item.patientDetails.M ?? null;
+                    const visitor = item.visitor.M || null;
+                    const patient = item.patientDetails.M || null;
                     
                     const formLink = `https://google.com?fn=${visitor.firstName.S}&ln=${visitor.lastName.S}&nric=${visitor.NRIC.S}&rs=${visitor.relationship.S}&pfn=${patient.firstName.S}&pln=${patient.lastName.S}&pw=${patient.ward.S}&pb=${patient.bed.S}`;
                     const replacementTemplateData = `{\"firstName\":\"${visitor.firstName.S}\",\"formLink\":\"${formLink}\"}`;
@@ -402,10 +407,10 @@ app.get('/retrieveDateV1', async (req, res) => {
                 if (!item.visitor.M.emailAddress.S || !item.visitor.M || !item.patientDetails.M) {
                     return null
                 } else {
-                    const visitor = item.visitor.M ?? null;
-                    const patient = item.patientDetails.M ?? null;
-                    const visitingID = item.visitingID.S ?? null;
-                    const visitingDate = item.visitingDate.S ?? null;
+                    const visitor = item.visitor.M || null;
+                    const patient = item.patientDetails.M || null;
+                    const visitingID = item.visitingID.S || null;
+                    const visitingDate = item.visitingDate.S || null;
                     
                     const formLink = `https://google.com?id=${visitingID}&fn=${visitor.firstName.S}&ln=${visitor.lastName.S}&nric=${visitor.NRIC.S}&rs=${visitor.relationship.S}&d=${visitingDate}&pfn=${patient.firstName.S}&pln=${patient.lastName.S}&pw=${patient.ward.S}&pb=${patient.bed.S}`;
                     const replacementTemplateData = `{\"firstName\":\"${visitor.firstName.S}\",\"formLink\":\"${formLink}\",\"visitingID\":\"${visitingID}\"}`;
