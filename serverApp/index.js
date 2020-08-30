@@ -241,6 +241,9 @@ app.post('/reservation', (req, res, next) => {
                     "address": {
                         "S": details.address
                     },
+                    "emailSent": {
+                        "BOOL": false
+                    },
                     "checkInDetails": {
                         "M": {
                             "checkedIn": {
@@ -403,7 +406,7 @@ app.get('/retrieveDateV1', async (req, res) => {
 
     const detailsList = await dynamodb.scan(queryParams).promise()
         .then((data) => {
-            return data.Items.map((item) => {
+            const emailDetails =  data.Items.map((item) => {
                 if (!item.visitor.M.emailAddress.S || !item.visitor.M || !item.patientDetails.M) {
                     return null
                 } else {
@@ -427,17 +430,60 @@ app.get('/retrieveDateV1', async (req, res) => {
             }).filter((f) => {
                 return (f !== undefined && f !== null) //removes null values
             })
+            const updateDetails = data.Items.map((item) => {
+                if (!item.visitor.M.emailAddress.S || !item.visitor.M || !item.patientDetails.M) {
+                    return null
+                } else { 
+                    const visitingID = item.visitingID.S || null;
+                    const visitingDate = item.visitingDate.S || null;
+                    
+                    return {visitingID, visitingDate}
+                }
+            })
+            return [emailDetails, updateDetails]
         })
 
-    const emailParams = {
-        "Destinations": detailsList,
-        "Template": "healthDeclarationEmailTemplate",
-        "DefaultTemplateData": `{\"firstName\":\"Oh no!\",\"formLink\":\"Something went wrong!\"}`,
-        "Source": "leo.qiyi.joel@dhs.sg",
-        "ReplyToAddresses": ["leo.qiyi.joel@dhs.sg"]
-    }
-    
-    if (emailParams.Destinations.length > 0){
+    console.log(detailsList)
+    if (detailsList[0].length > 0){
+
+        const emailParams = {
+            "Destinations": detailsList[0],
+            "Template": "healthDeclarationEmailTemplate",
+            "DefaultTemplateData": `{\"firstName\":\"Oh no!\",\"formLink\":\"Something went wrong!\"}`,
+            "Source": "leo.qiyi.joel@dhs.sg",
+            "ReplyToAddresses": ["leo.qiyi.joel@dhs.sg"]
+        }
+
+        detailsList[1].map((details) => {
+            const updateParams = {
+                "TableName": "visitorDetails",
+                "Key": {
+                    "visitingID": {
+                        "S": details.visitingID
+                    },
+                    "visitingDate": {
+                        "S": details.visitingDate
+                    }
+                },
+                "ExpressionAttributeNames": {
+                    "#V": "visitor",
+                    "#vs": "emailSent",
+                },
+                "ExpressionAttributeValues": {
+                    ":s": {
+                        "BOOL": true
+                    }
+                },
+                "UpdateExpression":"SET #V.#vs = :s",
+                "ReturnValues": "UPDATED_NEW"
+            }
+
+            dynamodb.updateItem(updateParams, (err, data) => {
+                if (err) res.send("something went wrong oh no")
+            }) 
+
+        })
+
         ses.sendBulkTemplatedEmail(emailParams).promise()
             .then((data) => {
                 res.send(data)
@@ -445,6 +491,7 @@ app.get('/retrieveDateV1', async (req, res) => {
     } else {
         res.send("nth to send bruh")
     }
+
 })
 
 app.listen(port, () => {
