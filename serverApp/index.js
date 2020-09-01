@@ -11,9 +11,12 @@ const ses = new AWS.SES({apiVersion: '2010-12-01'});
 const bodyParser = require('body-parser');
 const qrcode = require('qrcode');
 const { v4 : uuid } = require('uuid');
+const cors = require('cors')
 const port = process.env.PORT || 3000;
 
 const app = express();
+app.options(cors());
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -24,7 +27,7 @@ function declarationCheck (req, res, next) {
         "de3" : req.body.de3,
     };
     Object.entries(check).forEach((i) => {
-        req.body[i[0]] = (i[1] === "true") ? true : false
+        req.body[i[0]] = (i[1] === "true" ||i[1] === true) ? true : false
     })
     if (!(Object.values(req.body).includes(false))){
         const details = {
@@ -141,6 +144,8 @@ app.post('/login/:user', (req, res) => {
                     return i
                 }
             })
+            res.header("Access-Control-Allow-Origin", "http://localhost:1234")
+            res.header('Origin', "*")
             res.send(result)
         })
         .catch((err) => {
@@ -381,7 +386,7 @@ app.get('/retrieveDate', async (req, res) => {
 })
 
 app.get('/retrieveDateV1', async (req, res) => {
-    const d = new Date(new Date().getTime() - 28800000); //(+8hrs or + 28800000 depending on server location)
+    const d = new Date(new Date().getTime()); //(+8hrs or + 28800000 depending on server location)
     const queryParams = {
         "TableName": "visitorDetails",
         "ConsistentRead": true,
@@ -414,8 +419,10 @@ app.get('/retrieveDateV1', async (req, res) => {
                     const patient = item.patientDetails.M || null;
                     const visitingID = item.visitingID.S || null;
                     const visitingDate = item.visitingDate.S || null;
-                    
-                    const formLink = `https://google.com?id=${visitingID}&fn=${visitor.firstName.S}&ln=${visitor.lastName.S}&nric=${visitor.NRIC.S}&rs=${visitor.relationship.S}&d=${visitingDate}&pfn=${patient.firstName.S}&pln=${patient.lastName.S}&pw=${patient.ward.S}&pb=${patient.bed.S}`;
+                    const emailAddress = visitor.emailAddress.S.trim().replace(/\.+/g, '-').replace(/@+/g, '_').toLowerCase();
+                    const address = visitor.address.S.trim().replace(/\s+/g, '-').toLowerCase();
+
+                    const formLink = `https://google.com?id=${visitingID}&fn=${visitor.firstName.S}&ln=${visitor.lastName.S}&nric=${visitor.NRIC.S}&rs=${visitor.relationship.S}&d=${visitingDate}&e=${emailAddress}&a=${address}&pfn=${patient.firstName.S}&pln=${patient.lastName.S}&pw=${patient.ward.S}&pb=${patient.bed.S}`;
                     const replacementTemplateData = `{\"firstName\":\"${visitor.firstName.S}\",\"formLink\":\"${formLink}\",\"visitingID\":\"${visitingID}\"}`;
 
                     const emailTemplateEntries = {
