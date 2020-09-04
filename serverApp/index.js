@@ -375,8 +375,8 @@ app.get('/retrieveDate', async (req, res) => {
                 "TemplateData": `{\"firstName\":\"Oh no!\",\"formLink\":\"Something went wrong!\"}`
             }
         },
-        "FromEmailAddress": "leo.qiyi.joel@dhs.sg",
-        "ReplyToAddresses": ["leo.qiyi.joel@dhs.sg"]
+        "FromEmailAddress": "farrerpark.sg@gmail.com",
+        "ReplyToAddresses": ["farrerpark.sg@gmail.com"]
     }
 
     sesv2.sendBulkEmail(emailParams).promise()
@@ -422,7 +422,7 @@ app.get('/retrieveDateV1', async (req, res) => {
                     const emailAddress = visitor.emailAddress.S.trim().replace(/\.+/g, '-').replace(/@+/g, '_').toLowerCase();
                     const address = visitor.address.S.trim().replace(/\s+/g, '-').toLowerCase();
 
-                    const formLink = `https://google.com?id=${visitingID}&fn=${visitor.firstName.S}&ln=${visitor.lastName.S}&nric=${visitor.NRIC.S}&rs=${visitor.relationship.S}&d=${visitingDate}&e=${emailAddress}&a=${address}&pfn=${patient.firstName.S}&pln=${patient.lastName.S}&pw=${patient.ward.S}&pb=${patient.bed.S}`;
+                    const formLink = `http://d19c6e337bapzj.cloudfront.net/declaration.html?id=${visitingID}&fn=${visitor.firstName.S}&ln=${visitor.lastName.S}&nric=${visitor.NRIC.S}&rs=${visitor.relationship.S}&d=${visitingDate}&e=${emailAddress}&a=${address}&pfn=${patient.firstName.S}&pln=${patient.lastName.S}&pw=${patient.ward.S}&pb=${patient.bed.S}`;
                     const replacementTemplateData = `{\"firstName\":\"${visitor.firstName.S}\",\"formLink\":\"${formLink}\",\"visitingID\":\"${visitingID}\"}`;
 
                     const emailTemplateEntries = {
@@ -457,8 +457,8 @@ app.get('/retrieveDateV1', async (req, res) => {
             "Destinations": detailsList[0],
             "Template": "healthDeclarationEmailTemplate",
             "DefaultTemplateData": `{\"firstName\":\"Oh no!\",\"formLink\":\"Something went wrong!\"}`,
-            "Source": "leo.qiyi.joel@dhs.sg",
-            "ReplyToAddresses": ["leo.qiyi.joel@dhs.sg"]
+            "Source": "farrerpark.sg@gmail.com",
+            "ReplyToAddresses": ["farrerpark.sg@gmail.com"]
         }
 
         detailsList[1].map((details) => {
@@ -494,6 +494,9 @@ app.get('/retrieveDateV1', async (req, res) => {
         ses.sendBulkTemplatedEmail(emailParams).promise()
             .then((data) => {
                 res.send(data)
+            })
+            .catch((err) => {
+                res.send(err)
             })
     } else {
         res.send("nth to send bruh")
