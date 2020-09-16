@@ -1,0 +1,165 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.view{
+  grid-column: 2/5;
+  grid-row: 1/10;
+  display: grid;
+  grid-template-columns: 1fr 18fr 1fr;
+  overflow: scroll;
+}
+
+.main{
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 1fr 3fr;
+  grid-template-rows: 1fr, 8fr;
+}
+
+.search-container{
+  grid-column: 1/2;
+  grid-row: 1/2;
+}
+
+.search-container{
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.search-container input[type='textbox']{
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  padding: 2%;
+  width: 80%;
+  padding-right: 40px;
+  box-sizing: border-box;
+  border:none;
+  outline: none;
+  border-bottom: 1px solid  #b33939;
+}
+
+.search-icon{
+  position: absolute;
+  top: 10%;
+  left: 19%
+}
+
+.function-heading{
+  font-family: 'Roboto', sans-serif;
+  position: absolute;
+  top: 12%;
+  left: 10%;
+}
+
+.save{
+  grid-column: 1/2;
+  grid-row: 2/3;
+}
+
+.functions{
+  grid-column: 1/2;
+  grid-row: 3/10;
+}
+
+.border-functions{
+  border-top: 1px solid  #b33939;
+}
+
+.material-icons.md-48{
+  font-size: 36px;
+  text-align: center
+}
+
+h5{
+  font-family: 'Open Sans', sans-serif;
+  padding-left: 3%;
+  padding-top: 3%;
+  padding-bottom: 5%;
+  color: #b33939
+}
+
+.labeller{
+  text-align: center; 
+  cursor: pointer;
+  padding: 4%;
+}
+
+.labeller:hover{
+  outline: 1px solid #b33939;
+  //color: #b33939
+}
+
+.label-functions{
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+}
+
+.general-functions{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-row-gap: 22px;
+  grid-column-gap: 14px;
+  padding-left: 3%
+}
+
+.save-functions{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-column-gap: 5px;
+}
+
+.content-view{
+  text-align: center;
+}
+
+.title-view{
+  border:none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  color: #535c68;
+  font-size: 40px;
+}
+
+.para-view{
+  border:none;
+  width: 100%;
+  max-width:100%;
+  height: auto;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  overflow: hidden;
+  padding-top: 2%;
+  padding-bottom: 2%
+}
+
+.grid1{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-row-gap: 22px;
+  grid-column-gap: 20px;
+}
+
+.topnav {
+  background-color: #b33939;
+  font-family: 'Montserrat', sans-serif;
+  overflow: hidden;
+}
+
+.topnav a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a:hover {
+  background-color: white;
+  color: black;
+}
