@@ -94,6 +94,8 @@ function start(){
         })
   })
 
+  var count = 8
+
   document.getElementById('paragraph').addEventListener('click', function(){
     var contentContainer = document.getElementById('contentview')
     var content = document.createElement('textarea')
