@@ -153,6 +153,68 @@ app.post('/login/:user', (req, res) => {
         })
 });
 
+app.post('/snapshot/:methodUsed', (req, res) => {
+    const allowedMethods = ["REQ", "UPDATE"];
+    const snapshotID = req.body.id || null;
+    const newSnapshot = req.body.snapshot || null;
+    const method = allowedMethods.includes(req.params.methodUsed) ? req.params.methodUsed : null;
+
+    if (method == "REQ" && snapshotID) {
+        const params =   {
+            "TableName": "websiteSnapshot",
+            "ConsistentRead": true,
+            "ExpressionAttributeNames": {
+                "#sid": "snapshotID",
+                "#s": "snapshot"
+            },
+            "ExpressionAttributeValues": {
+                ":sid": {
+                    "S": snapshotID
+                }
+            },
+            "FilterExpression": "#sid = :sid",
+            "ProjectionExpression": "#s",
+        } 
+
+        dynamodb.scan(params).promise()
+        .then(({ Items: data }) => {
+            res.send(data[0].snapshot.S)
+        })
+        .catch((err) => {
+            res.send(err)
+        })
+
+    } else if (method == "UPDATE" && snapshotID && newSnapshot) {
+
+        const params = {
+            "TableName": "websiteSnapshot",
+            "Key": {
+                "snapshotID": {
+                    "S": snapshotID
+                }
+            },
+            "ExpressionAttributeNames": {
+                "#s": "snapshot"
+            },
+            "ExpressionAttributeValues": {
+                ":s": {
+                    "S": newSnapshot
+                }
+            },
+            "UpdateExpression":"SET #s = :s",
+            "ReturnValues": "UPDATED_NEW"
+        }
+
+        dynamodb.updateItem(params, (err, data) => {
+            if (err) {
+                res.send("something went wrong oh no")
+            } else {
+                res.send('Successfully updated!')
+            }
+        }) 
+    }
+});
+
 app.post('/healthdeclaration', declarationCheck, (req, res, next) => {
     //lets assume that there is all greatness in people and no false value is given. not implementing any checks
     getDetails(true, req, res, next);
