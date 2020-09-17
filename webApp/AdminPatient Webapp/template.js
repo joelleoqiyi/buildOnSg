@@ -34,12 +34,12 @@ function autoResize() {
   this.style.height = this.scrollHeight + 'px'; 
 } 
 
-var count = 8
-
 function start(){
   document.getElementById('publish').addEventListener('click', function(){
     alert('successfully saved question mark?')
   })
+
+  var count = 8
 
   document.getElementById('paragraph').addEventListener('click', function(){
     var contentContainer = document.getElementById('contentview')
@@ -51,5 +51,6 @@ function start(){
     var div = document.createElement('div')
     div.append(content)
     contentContainer.append(div)
+    count ++
   })
 }
