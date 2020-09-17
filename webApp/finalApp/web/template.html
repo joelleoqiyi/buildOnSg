@@ -1,0 +1,129 @@
+<!Doctype html>
+
+<html>
+  <head>
+    <title>Web Editor</title>
+    <style></style>
+    <link href='template.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+  </head>
+  <body>
+    <div class='topnav'>
+      <nav>
+        <a href="#">Viewing panel</a>
+        <a href="#">Make edits</a>
+        <div class='web-id'> Web ID: 93klefuw8</div>
+      </nav>
+    </div>
+    <div class='main'>
+      <div class='search-container'>
+        <div class='search'>
+          <input type='textbox' placeholder='Search for a block' id='searchbox'>
+          <span class="material-icons search-icon">search</span>
+        </div>
+        <br>
+      </div>
+
+      <div class='save'>
+        <h1 class='border-functions'></h1>
+        <br>
+        <div class='save-functions'>
+          <div></div>
+          <div class='labeller' id='draft'>
+            <span class="material-icons md-48">done</span>
+            <p class='label-functions'>Save as draft</p>
+          </div>
+          <div class='labeller' id='publish'>
+            <span class="material-icons md-48">publish</span>
+            <p class='label-functions'>Publish</p>
+          </div>
+          <div></div>
+        </div>
+      </div>
+      
+      <div class='functions'>
+        <h1 class='border-functions'></h1>
+        <div><h5>TEXT</h5></div>
+
+        <div class='general-functions'>
+          <div class='labeller' id='heading'>
+            <span class="material-icons md-48">bookmark</span>
+            <p class='label-functions'>Heading</p>
+          </div>
+          <div class='labeller' id='paragraph'>
+            <span class="material-icons md-48">format_indent_increase</span>
+            <p class='label-functions'>Paragraph</p>
+          </div>
+          <div class='labeller' id='list'>
+            <span class="material-icons md-48">list</span>
+            <p class='label-functions'>List</p>
+          </div>
+          <div class='labeller' id='quote'>
+            <span class="material-icons md-48">format_quote</span>
+            <p class='label-functions'>Quote</p>
+          </div>
+          <div class='labeller' id='code'>
+            <span class="material-icons md-48">code</span>
+            <p class='label-functions'>Code</p>
+          </div>
+          <div class='labeller' id='table'>
+            <span class="material-icons md-48">table_chart</span>
+            <p class='label-functions'>Table</p>
+          </div>
+        </div>
+        <br>
+        <br>
+        <div><h5>DESIGN</h5></div>
+        <div class='general-functions'>
+          <div class='labeller' id='layout'>
+            <span class="material-icons md-48">view_quilt</span>
+            <p class='label-functions'>Layout Grid</p>
+          </div>
+          <div class='labeller' id='column'>
+            <span class="material-icons md-48">view_column</span>
+            <p class='label-functions'>Columns</p>
+          </div>
+          <div class='labeller' id='spacer'>
+            <span class="material-icons md-48">format_line_spacing</span>
+            <p class='label-functions'>Spacer</p>
+          </div>
+          <div class='labeller' id='button'>
+            <span class="material-icons md-48">smart_button</span>
+            <p class='label-functions'>Buttons</p>
+          </div>
+          <div class='labeller' id='radiobutton'>
+            <span class="material-icons md-48">radio_button_checked</span>
+            <p class='label-functions'>Radio Buttons</p>
+          </div>
+          <div class='labeller' id='checkbox'>
+            <span class="material-icons md-48">check_box</span>
+            <p class='label-functions'>Check Boxes</p>
+          </div>
+          <div class='labeller' id='dottedseparator'>
+            <span class="material-icons md-48">line_style</span>
+            <p class='label-functions'>Dotted separator</p>
+          </div>
+          <div class='labeller' id='normalseparator'>
+            <span class="material-icons md-48">line_weight</span>
+            <p class='label-functions'>Separator</p>
+          </div>
+          <div class='labeller' id='image'>
+            <span class="material-icons md-48">insert_photo</span>
+            <p class='label-functions'>Images</p>
+          </div>
+        </div>
+      </div>
+
+
+      <div class='view' id="view">
+        <span class="loading">Loading Content...</span>
+      </div>
+    </div>
+  </body>
+  <script src="template.js"></script>
+</html>
