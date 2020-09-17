@@ -68,12 +68,7 @@ function getDetails (dc, req, res, next) {
 }
 
 app.get('/', (req, res) => {
-    const x = req.body.x || null
-    xx = "l"
-    y = "x"
-    const replacementTemplateData = `{\"firstName\":\"${x}\",\"formLink\":\"${y}\"}`
-    console.log(typeof replacementTemplateData, )
-    res.send(replacementTemplateData)
+    res.send('good morning!')
 })
 
 app.post('/login/:user', (req, res) => {
@@ -144,8 +139,6 @@ app.post('/login/:user', (req, res) => {
                     return i
                 }
             })
-            res.header("Access-Control-Allow-Origin", "http://localhost:1234")
-            res.header('Origin', "*")
             res.send(result)
         })
         .catch((err) => {

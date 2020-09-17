@@ -13,28 +13,42 @@ function patientSignIn(){
   }
   
   //send this sht to server
+  fetch("http://localhost:3000/login/patient", {
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(
+      {
+        "username": patientID,
+        "name": patientName
+      }
+    )
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.length > 0) {
+        msg.textContent = ''
+        const detailBox = document.getElementById('login-box')
+        detailBox.classList.remove('login-box')
+        detailBox.classList.add('login-box-patient')
+        document.getElementById('patient-id').value = `Ward Number: ${data[0].ward}`
+        document.getElementById('patient-name').value = `Bed Number: ${data[0].bed}`;
+        document.getElementById('submit1').classList.add('hide')
 
-  //checks if information is present
-  else if (serv === null){
-    msg.textContent = 'Sorry patient not found. Please try again.'
-  }
-  //correct input
-  else if (serv === 'ok'){
-    msg.textContent = ''
-    document.getElementById('login-box').classList.remove('login-box')
-    document.getElementById('login-box').classList.add('login-box-patient')
-    document.getElementById('submit1').classList.add('hide')
+        var details = document.getElementById('details')
+        var paraContainer = document.createElement('p')
+        var paraMessage = document.createTextNode('Do you wish to accept any visitors currently?')
+        paraContainer.append(paraMessage)
+        details.append(paraContainer)
 
-    var details = document.getElementById('details')
-    var paraContainer = document.createElement('p')
-    var paraMessage = document.createTextNode('Do you wish to accept any visitors currently?')
-    paraContainer.append(paraMessage)
-    details.append(paraContainer)
-
-    document.getElementById('switch-container').classList.remove('hide')
-    document.getElementById('submit2').classList.remove('hide')
-    document.getElementById('submit2').classList.add('btn')
-  }
+        document.getElementById('switch-container').classList.remove('hide')
+        document.getElementById('submit2').classList.remove('hide')
+        document.getElementById('submit2').classList.add('btn')
+      } else if (data.length == 0) {
+        msg.textContent = 'Sorry patient not found. Please try again.'
+      }
+    })
 }
 
 //to be send to the server
