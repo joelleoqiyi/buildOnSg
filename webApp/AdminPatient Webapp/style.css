@@ -1,0 +1,154 @@
+@import 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css';
+
+body{
+  margin: 0;
+  padding: 0;
+}
+
+.options-container{
+  text-align: center;
+  margin-top: 25%;
+}
+
+.btn{
+  border: 1px solid #b33939;
+  background: transparent;
+  padding: 10px 20px;
+  font-family: 'Titillium Web', sans-serif;
+  cursor: pointer;
+  margin: 10px;
+  border-radius: 25px;
+  color: #b33939;
+  transition: .3s;
+  overflow: hidden;
+}
+
+.btn:hover{
+  background: #b33939;
+  color: white;
+}
+
+.login-box{
+  width: 300px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.login-box-patient{
+  width: 500px;
+  margin-top: 2%;
+  margin-left: 18%
+}
+
+h1{
+  font-size: 32px;
+  font-family: 'Titillium Web', sans-serif;
+  border-bottom: 2px solid #b33939;
+  margin-bottom: 5px;
+  padding: 10px 0;
+}
+
+.txtbox{
+  width: 100%;
+  overflow: hidden;
+  font-size: 20px;
+  padding: 8px 0;
+  margin: 8px 0;
+  border-bottom: 1px solid #b33939;
+}
+
+.txtbox i{
+  width: 26px;
+  float: left;
+  text-align: center;
+}
+
+.txtbox input{
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 18px;
+  width: 80%;
+  float: left;
+  margin: 0 10px;
+}
+
+.msg{
+  font-size: 18px;
+  font-family: 'Titillium Web', sans-serif;
+  color: #ccc;
+}
+
+.hide{
+  display: none;
+}
+
+p{
+  font-size: 24px;
+  font-family: 'Titillium Web', sans-serif;
+}
+
+.switch{
+  position: relative;
+  display: inline-block;
+  width: 75px;
+  height: 30px;
+  margin: 0 10px;
+}
+
+.slider{
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.switch input{
+  display: none
+}
+
+.slider:before{
+  position: absolute;
+  content: '';
+  height: 28px;
+  width: 28px;
+  left: 2px;
+  bottom: 1px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 20px;
+}
+
+.switch-btn:checked + .slider{
+  background-color: #b33939;
+}
+
+.switch-btn:checked + .slider:before{
+  //-webkit-transform: translateX(26px);
+  //-ms-transform: translateX(26px);
+  transform: translateX(42px);
+}
+
+.slider:after{
+ content:'No';
+ color: white;
+ display: block;
+ position: absolute;
+ transform: translate(-20%,-60%);
+ top: 50%;
+ left: 50%;
+ font-size: 15px;
+ font-family: Verdana, sans-serif;
+}
+
+input:checked + .slider:after{  
+  content:'Yes';
+  transform: translate(-85%,-60%);
+}
