@@ -172,3 +172,7 @@ h5{
   background-color: white;
   color: black;
 }
+
+.loading {
+  font-size: 20px;
+}
