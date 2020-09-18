@@ -441,7 +441,7 @@ app.get('/retrieveDate', async (req, res) => {
 })
 
 app.get('/retrieveDateV1', async (req, res) => {
-    const d = new Date(new Date().getTime()); //(+8hrs or + 28800000 depending on server location)
+    const d = new Date(new Date().getTime() + 43200000); //(+8hrs or + 28800000 depending on server location)
     const queryParams = {
         "TableName": "visitorDetails",
         "ConsistentRead": true,
@@ -558,6 +558,7 @@ app.get('/retrieveDateV1', async (req, res) => {
     }
 
 })
+
 
 app.listen(port, () => {
     console.log(`Listening to port ${port}`);

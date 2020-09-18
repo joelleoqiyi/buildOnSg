@@ -1,0 +1,72 @@
+body{
+  background: #DC143C;
+  height : 100%;
+  width: 100%;
+}
+
+html, body {
+  height: 100%;
+}
+
+.middle{
+  background:white;
+  height: 100%;
+  width: 70%;
+  margin: auto;
+}
+
+.border{
+  border: 1px, black;
+  border-style: solid;
+  margin: auto;
+  width: 260px;
+  height: 145px;
+  border-top: 0px;
+  border-left: 0px;
+  border-right: 0px;
+}
+
+
+.heading{
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 50px;
+  text-align: center;
+  padding: 15px;
+
+}
+
+
+.button1{
+
+  text-align: center; 
+  Margin-top: 12.5%; 
+}
+
+.button2{
+
+  text-align: center;
+  Margin-top:  25% ;
+}
+
+.button{
+  text-align:center;
+  margin: auto;
+  background-color:  #DC143C;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 20px;
+  color: white;
+  padding: 15px 32px;
+  border-radius: 30px;
+  border: 1px;
+  border-style: solid;
+}
+
+.button:hover{
+  background: white;
+  border: 1px, #DC143C;
+  border-style: solid;
+  color: #DC143C;
+}
+
+
+/*# sourceMappingURL=./style-kiosk.997ee46e.css.map */

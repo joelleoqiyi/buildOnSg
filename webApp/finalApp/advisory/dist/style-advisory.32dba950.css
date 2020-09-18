@@ -1,0 +1,132 @@
+body{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+header
+nav{
+  height: 80px;
+  width: 100%;
+}
+
+.header-2{
+  padding: 0;
+  margin: 0;
+  float: left;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
+}
+
+.header-2-0{
+  border-right: 1px solid #dcdde1;
+  border-bottom: 1px ;
+}
+
+.header-2-1{
+  border-bottom: 1px;
+}
+
+.header-2 li{
+  display: inline-block;
+  line-height: 80px;
+}
+
+hr{
+  border: 2px solid #dcdde1;
+}
+
+.grid-container{
+  display:grid;
+  height: 100vh;
+  grid-template-columns: 1fr 8fr 1fr;
+}
+
+select{
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+
+  display: in-line;
+  margin: 30px 0px;
+  padding: 10px 50px 10px 10px;
+  border: 1px solid  #dcdde1;
+  cursor:pointer;
+
+  background: url('./arrow.69b8dab4.png') no-repeat 95% center;
+}
+
+input{
+  display: in-line;
+  margin: 30px 0px;
+  padding: 10px 50px 10px 50px;
+  border: 1px solid  #dcdde1;
+}
+
+.submit{
+  border: 1px solid #b33939;
+  background: #b33939;
+  padding: 10px 20px;
+  font-size: 18px;
+  font-family: 'Titillium Web', sans-serif;
+  cursor: pointer;
+  margin: 10px;
+  width: 160px;
+  height: 50px;
+  border-radius: 30px;
+  color: white;
+}
+
+.image{
+  background-color:rgb(0, 0, 0);
+  border: 2px solid rgb(102, 102, 102);
+  width: 250px;
+  height: absolute;
+}
+
+.msg{
+  font-size: 18px;
+  font-family: 'Titillium Web', sans-serif;
+  color: black;
+}
+
+/*exclusively for covid page*/
+.content-view{
+  text-align: center;
+}
+
+.title-view{
+  border:none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  color: #535c68;
+  font-size: 40px;
+  cursor: default;
+}
+
+.para-view{
+  border:none;
+  outline: none;
+  width: 100%;
+  resize: none;
+  height: auto;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  overflow: hidden;
+  padding-top: 2%;
+  padding-bottom: 2%;
+  cursor: default;
+}
+
+
+.grid1{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-row-gap: 22px;
+  grid-column-gap: 20px;
+}
+
+/*# sourceMappingURL=./style-advisory.32dba950.css.map */
